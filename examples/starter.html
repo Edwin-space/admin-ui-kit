@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin UI Kit · 프로젝트 시작 예제</title>
+<link rel="stylesheet" href="../src/tokens.css">
+<link rel="stylesheet" href="../src/components.css">
+<style>
+  body{margin:0;background:var(--ak-bg)}
+  main{width:min(100% - 32px,960px);margin:32px auto}
+  h1{font-size:28px} h2{font-size:17px}
+  #stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,175px),1fr));gap:12px}
+  section{margin-top:16px;padding:16px}
+</style>
+<body>
+<main class="ak">
+  <h1>프로젝트 운영 개요</h1>
+  <p>가짜 데이터로 표시한, 복사용 시작 예제입니다.</p>
+  <div id="stats" aria-label="요약"></div>
+  <section class="ak-card"><h2>최근 활동</h2><div id="events"></div></section>
+</main>
+<script src="../src/components.js"></script>
+<script>
+  const {stat,table}=AdminKit;
+  document.getElementById('stats').innerHTML=[
+    {label:'처리 대기',value:1,detail:'검토 예정',symbol:'queue'},
+    {label:'오늘 완료',value:0,detail:'완료 내역',symbol:'check',tone:'good'}
+  ].map(stat).join('');
+  document.getElementById('events').innerHTML=table({
+    columns:[{key:'name',label:'활동'},{key:'status',label:'상태',kind:'badge'}],
+    rows:[{name:'예제 보고서',status:'대기',tone:'warn'}]
+  });
+</script>
+</body>
+</html>

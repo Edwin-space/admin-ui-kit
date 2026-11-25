@@ -1,0 +1,10 @@
+/* Adopt these tokens on a wrapper to avoid touching host-app defaults. */
+:where(.ak, :root) {
+  --ak-bg:#f5f6f9; --ak-surface:#fff; --ak-text:#151824; --ak-muted:#505969;
+  --ak-border:#e1e4ed; --ak-primary:#4934af; --ak-accent:#ede8ff; --ak-accent-text:#47319f;
+  --ak-good:#075c4d; --ak-good-bg:#dcf5ec; --ak-warn:#804114; --ak-warn-bg:#ffeedb;
+  --ak-bad:#a1293a; --ak-bad-bg:#fae4e8; --ak-focus:#6343cf;
+  --ak-s1:4px; --ak-s2:8px; --ak-s3:12px; --ak-s4:16px; --ak-s6:24px; --ak-s8:32px;
+  --ak-radius:12px; --ak-shell:190px; --ak-content:1200px;
+  --ak-font:system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif;
+}
