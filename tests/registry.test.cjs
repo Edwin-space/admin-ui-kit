@@ -4,7 +4,7 @@ const root=path.resolve(__dirname,'..');
 const read=f=>fs.readFileSync(path.join(root,f),'utf8');
 const manifest=JSON.parse(read('registry/index.json'));
 assert.equal(manifest.components.length,22);
-assert.equal(manifest.blocks.length,6);
+assert.equal(manifest.blocks.length,21);
 for(const p of [manifest.entrypoint,manifest.layout,manifest.starter,manifest.blocksExample])assert.ok(read(p));
 const ids=new Set();
 for(const entry of [...manifest.components,...manifest.blocks]){
@@ -16,6 +16,10 @@ for(const entry of [...manifest.components,...manifest.blocks]){
   }
   const html=vm.runInContext(entry.example.call,context);
   assert.match(html,/^</);assert.ok(!html.includes('undefined'));
+  for(const variant of entry.variants??[]) {
+    const markup=vm.runInContext(variant.call,context);
+    assert.match(markup,/^</);assert.ok(!markup.includes('undefined'));
+  }
 }
 const html=read(manifest.blocksExample);
 const ctx=vm.createContext({document:{querySelector:id=>slots[id]}});
@@ -25,4 +29,4 @@ assert.match(slots['#events'].innerHTML,/예제 보고서/);
 assert.match(slots['#requests'].innerHTML,/data-ak-action="review:demo-1"/);
 slots['#requests'].click({target:{closest:()=>({dataset:{akAction:'review:demo-1'}})}});
 assert.match(slots['#status'].textContent,/호스트에서 검토 이벤트를 받았습니다/);
-console.log('PASS: 22 independent components, six block/pattern entries, standalone host event.');
+console.log('PASS: 22 independent components, 21 dashboard blocks and patterns, standalone host event.');

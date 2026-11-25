@@ -20,7 +20,13 @@ const click=(attribute,dataset={})=>bindings.click({target:{closest:()=>({disabl
   assert.match(main.innerHTML,/운영 대시보드/); render('overview'); assert.match(main.innerHTML,/운영 화면을 위한/);
   assert.match(s.AdminKit.badge('<img>','bad'),/&lt;img&gt;/);
   assert.match(s.AdminKit.stat({label:'Zero',value:0}),/>0<\/strong>/);
-  render('components'); assert.equal((main.innerHTML.match(/class="demo-card"/g)||[]).length,22);
+  render('components');
+  assert.equal((main.innerHTML.match(/data-item-id=/g)||[]).length,43);
+  assert.equal(s.AdminDashboardCatalog.length,21);
+  const kpiPreview=s.AdminDashboardCatalog.find(i=>i.id==='metricGrid');
+  const kpiMarkup=s.AdminReference.metricGrid(...kpiPreview.args);
+  assert.ok(main.innerHTML.includes(kpiMarkup));
+  assert.ok(main.innerHTML.includes('#components/approvalBody'));
   assert.equal(new Set(s.AdminCatalog.map(i=>i[0])).size,22);
   assert.equal(s.AdminCatalog.filter(i=>i[2].startsWith('영상')).length,13);
   for(const [id,,, ,args] of s.AdminCatalog){assert.equal(typeof s.AdminKit[id],'function');assert.ok(s.AdminKit[id](...args).startsWith('<'));}
@@ -28,7 +34,7 @@ const click=(attribute,dataset={})=>bindings.click({target:{closest:()=>({disabl
   assert.match(s.AdminKit.progress({label:'진행',value:250}),/value="100"/);
   assert.match(s.AdminKit.textField({id:'field',label:'입력',error:'오류'}),/aria-invalid="true" aria-describedby="field-error"/);
   assert.match(s.AdminKit.pagination({page:1,total:3}),/page:0" disabled/);
-  render('blocks'); assert.equal((main.innerHTML.match(/class="rb-metric"/g)||[]).length,4);
+  render('blocks'); assert.equal((main.innerHTML.match(/class="rb-metric"/g)||[]).length,4); assert.ok(main.innerHTML.includes(kpiMarkup));
   bindings.input({target:{id:'query',value:'내보내기'}});assert.match(results.innerHTML,/내보내기/);assert.doesNotMatch(results.innerHTML,/권한 변경/);
   change('filter','완료');assert.match(results.innerHTML,/조건에 맞는 활동이 없습니다/);
   change('scenario','loading');assert.match(main.innerHTML,/불러오는 중/);

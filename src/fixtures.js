@@ -20,3 +20,14 @@ window.AdminFixtures={
     {id:'RQ-103',name:'팀 설정 변경 검토',detail:'알림 수신 대상 변경',tone:'accent',status:'검토 대기'}
   ]
 };
+window.AdminFixtures.dashboardMetrics=function(queue=this.queue,done=0){
+ return [
+  {label:'오늘 처리',value:this.stats[2].value+done,detail:'완료된 예제 작업',symbol:'activity',tone:'accent'},
+  {label:'승인 대기',value:queue.length,detail:'내가 확인할 요청',symbol:'clock',tone:'warn'},
+  {label:'확인 필요',value:this.stats[3].value,detail:'실패한 작업',symbol:'alert',tone:'bad'},
+  {label:'운영 지표',value:'+24%',detail:'예제 효율 변화',symbol:'check',tone:'good'}
+ ];
+};
+window.AdminFixtures.reviewHistory=function(decisions=[]){
+ return [...decisions,...this.activity.filter(item=>item.status==='완료').map(item=>({title:item.name,time:item.time,detail:item.group}))].slice(0,5);
+};

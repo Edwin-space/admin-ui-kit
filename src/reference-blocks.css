@@ -200,3 +200,29 @@ main.wide-preview{--ak-content:1340px;padding-block:14px 26px}
 .rb-section-tools{max-width:100%}
 .rb-connection .ak-connection{flex-wrap:wrap}
 @media(max-width:360px){.rb-event-list li{grid-template-columns:29px 16px minmax(0,1fr) 49px}}
+
+/* Catalog uses the real renderers and styles; only the surrounding stage differs. */
+.catalog-group{margin-top:24px}
+.catalog-group>h2{font-size:19px;margin:0}
+.catalog-group .catalog{margin-top:10px}
+.demo-card[hidden],.catalog-group[hidden]{display:none}
+.demo-wide{grid-column:1/-1}
+.demo-card h3{font-size:17px;margin:0}
+.demo-card h3 a{text-decoration:none}
+.demo-card h3 a:hover{text-decoration:underline}
+.catalog-variant{display:flex;align-items:center;gap:8px;font-size:13px;margin-top:10px}
+.catalog-variant .ak-control{min-height:34px}
+.rb-preview-stage{display:block;background:#eef1f3;padding:16px;border:1px solid #e7ecef}
+.rb-preview-stage>.rb-rail{width:64px;min-height:256px;margin:auto}
+.rb-preview-stage>.rb-head{flex-wrap:wrap}
+.rb-preview-stage>.rb-head h3{font-size:24px;line-height:32px;letter-spacing:-.04em;color:var(--rb-ink)}
+.rb-preview-stage>.rb-orbit{max-width:220px;margin:auto}
+.rb-preview-panel{padding:20px;background:#fff}
+.rb-preview-stage .rb-view-tools{justify-content:flex-start}
+.rb-preview-stage>.rb-connection{width:100%}
+.rb-preview-stage>.rb-rail>div{display:grid}
+.rb-preview-stage>.rb-rail{flex-direction:column;gap:10px}
+.rb-preview-stage>.rb-rail-end{display:grid}
+.rb-preview-stage>.rb-metric{max-width:310px;margin:auto}
+.rb-preview-stage>.rb-head .ak-search input{min-width:0;width:min(48vw,225px)}
+@media(max-width:640px){.rb-preview-stage{padding:9px}.rb-preview-stage>.rb-head h3{font-size:20px}}
