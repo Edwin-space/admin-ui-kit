@@ -104,3 +104,99 @@ main.wide-preview{--ak-content:1340px;padding-block:14px 26px}
 @media(max-width:430px){.rb-shell{grid-template-columns:1fr}.rb-rail{flex-direction:row;padding:6px;gap:6px;border-right:0;border-bottom:1px solid #e8ebed}.rb-rail>div{display:flex;gap:6px}.rb-rail>div a{min-width:34px}.rb-rail-end{display:none}.rb-body{padding:8px}.rb-bottom{grid-template-columns:1fr}.rb-activity{grid-template-columns:1fr}.rb-orbit svg{max-width:122px}.rb-metric-value strong{font-size:20px}.rb-legend{margin-top:3px}.rb-toolbar{gap:4px}.rb-context{display:none}}
 .rb-approval-main:has(.rb-empty-action){grid-template-rows:auto 1fr auto auto}
 .rb-empty-action{text-align:center}
+
+/* v0.4 desktop rhythm; shared Base controls/catalog are intentionally unchanged. */
+.rb-page{--rb-ink:#24282d;--rb-muted:#58636d;--rb-line:#e7ecef;--rb-canvas:#f2f4f5;--rb-rail:64px;--rb-gap:12px;--ak-primary:#252a30}
+.rb-shell{padding:10px 16px 10px 12px;column-gap:22px;border-radius:18px;background:linear-gradient(#f2f4f5,#e9edef)}
+.rb-rail{align-self:stretch;border:1px solid var(--rb-line);border-radius:14px;padding:11px 4px;gap:12px}
+.rb-rail>div{gap:6px}
+.rb-rail>div a{min-height:42px;align-content:center}
+.rb-rail small{font-size:12px;line-height:16px}
+.rb-body{padding:0;gap:12px}
+.rb-head{align-items:center;padding:0;min-height:57px}
+.rb-head h1{font-size:24px;line-height:32px;letter-spacing:-.04em}
+.rb-head p,.rb-context{font-size:12px;line-height:16px}
+.rb-actions{gap:8px}
+.rb-actions .ak-search input,.rb-head .rb-head-action{min-height:36px;font-size:14px;border-radius:8px}
+.rb-metric,.rb-panel{padding:16px;border:0;border-radius:12px}
+.rb-metric{min-height:118px;display:grid;grid-template-rows:auto 1fr}
+.rb-metric-top{font-size:13px;line-height:18px;min-height:24px}
+.rb-metric-value{gap:8px;margin-top:10px;position:relative}
+.rb-metric-value>div:first-child{min-width:0}
+.rb-metric-value strong,.rb-impact>strong{font-size:28px;line-height:36px}
+.rb-metric-value small,.rb-impact>small{font-size:12px;line-height:16px;margin-top:2px}
+.rb-spark{flex:none;width:clamp(28px,32%,96px);align-self:end;margin-bottom:3px}
+.rb-middle{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.rb-section-head{gap:8px;margin-bottom:12px}
+.rb-section-head h3{font-size:16px;line-height:22px}
+.rb-section-head p{font-size:12px;line-height:16px;margin-top:4px}
+.rb-section-tools{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.rb-section-tools:empty{display:none}
+.rb-section-tools>small{font-size:12px;line-height:16px;font-weight:650;background:#f0f2f3;padding:3px 8px;border-radius:8px;white-space:nowrap}
+.rb-view-tools .ak-control{min-height:32px;font-size:12px}
+.rb-activity{grid-template-columns:minmax(132px,1fr) minmax(0,1.85fr);gap:16px;min-height:225px}
+.rb-orbit svg{max-width:236px}
+.rb-legend{font-size:12px;gap:12px;margin-bottom:8px}
+.rb-event-list li{grid-template-columns:37px 22px minmax(45px,.6fr) minmax(0,1.45fr) 53px;gap:8px;min-height:36px;font-size:13px}
+.rb-event-list time,.rb-targets small,.rb-thresholds>div>span{font-size:12px;font-variant-numeric:tabular-nums}
+.rb-event-icon{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:color-mix(in srgb,var(--event) 22%,white);color:#363f47}
+.rb-event-icon .ak-icon{width:13px;height:13px}
+.rb-event-detail,.rb-event-list li strong,.rb-request-copy{overflow-wrap:anywhere;min-width:0}
+.rb-event-detail{color:var(--rb-muted)}
+.rb-page .ak-badge{font-size:12px;line-height:16px}
+.rb-event-list .ak-badge{justify-self:end;min-width:48px;justify-content:center}
+.rb-event-list .ak-badge>span,.rb-requests .ak-badge>span{display:none}
+.rb-requests{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.rb-requests>li{display:grid;grid-template-columns:24px minmax(0,1fr) 64px;gap:8px;align-items:start;min-height:74px;padding:10px 12px;border:1px solid var(--rb-line);border-radius:8px;background:#f8fafb}
+.rb-requests .ak-glyph{width:24px;height:24px}
+.rb-requests .ak-icon{width:14px;height:14px}
+.rb-request-copy{display:grid;justify-items:start;gap:2px;font-size:14px;line-height:20px}
+.rb-request-copy>small{font-size:12px;line-height:16px;color:var(--rb-muted)}
+.rb-request-copy>.ak-badge{margin-top:2px}
+.rb-requests .ak-button{align-self:center;width:100%;min-height:36px;padding:3px 6px;font-size:14px;border-radius:8px}
+.rb-requests .ak-button:disabled{opacity:1;color:var(--rb-muted);background:#e9eef0;border-color:#e9eef0}
+.rb-bottom>.rb-panel{min-height:230px}
+.rb-targets>div,.rb-thresholds>div{font-size:13px;min-height:36px;gap:6px}
+.rb-targets>div{grid-template-columns:minmax(65px,.75fr) minmax(45px,1.5fr) 38px}
+.rb-impact svg{height:84px}
+.rb-impact>div{font-size:12px}
+.rb-connection{position:static;width:min(100%,860px)}
+.rb-connection .ak-connection{border-radius:11px}
+.rb-connection .ak-connection button{min-height:36px;font-size:14px;border-radius:8px}
+@media(max-width:1100px){
+ .rb-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .rb-middle{grid-template-columns:minmax(0,1fr)}
+ .rb-activity{grid-template-columns:minmax(122px,.85fr) minmax(0,1.7fr)}
+}
+@media(max-width:860px){
+ .rb-bottom{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .rb-head{flex-wrap:wrap}
+ .rb-actions{justify-content:flex-start}
+}
+@media(max-width:760px){
+ .rb-activity{grid-template-columns:minmax(0,1fr)}
+ .rb-bottom{grid-template-columns:1fr}
+ .rb-orbit svg{max-width:175px}
+}
+@media(max-width:640px){
+ main.wrap.wide-preview{width:calc(100% - 20px)}
+ .rb-shell{grid-template-columns:minmax(0,1fr);padding:8px;row-gap:12px}
+ .rb-rail{flex-direction:row;min-height:48px;padding:4px 6px;gap:6px}
+ .rb-rail>div{display:flex;justify-content:space-between;gap:2px}
+ .rb-rail>div a{flex:1;min-width:0;min-height:44px}
+ .rb-rail-end{display:none}
+ .rb-body{padding:0}
+ .rb-metric,.rb-panel{padding:12px}
+ .rb-actions .ak-search input,.rb-head .rb-head-action,.rb-requests .ak-button,.rb-connection .ak-connection button{min-height:44px}
+ .rb-actions .ak-search input{width:min(48vw,240px);min-width:0}
+ .rb-event-list li{grid-template-columns:33px 18px minmax(0,1fr) 50px;gap:6px}
+ .rb-event-icon{width:18px;height:18px}
+ .rb-event-detail{grid-column:3;grid-row:2;padding-bottom:2px}
+ .rb-event-list .ak-badge{grid-column:4;grid-row:1/3}
+}
+@media(max-width:500px){.rb-metrics{grid-template-columns:minmax(0,1fr)}}
+/* The standalone blocks use the same assets without the catalogue's stylesheet. */
+.rb-section-head>div:first-child{min-width:0}
+.rb-section-tools{max-width:100%}
+.rb-connection .ak-connection{flex-wrap:wrap}
+@media(max-width:360px){.rb-event-list li{grid-template-columns:29px 16px minmax(0,1fr) 49px}}

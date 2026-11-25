@@ -18,13 +18,14 @@
   let catalogFilter='all', catalogQuery='';
   function components() {
     return intro('CATALOG / 02','컴포넌트','영상에서 참고한 화면 요소와 여러 프로젝트에 공통으로 쓸 부품을 구분해 정리했습니다.')+
+      '<p class="ak"><a class="ak-button" href="./registry/index.json">AI용 소스 목록</a> <a class="ak-button" href="./examples/blocks-starter.html">독립 블록 예제</a></p>'+
       '<div class="foundation"><div><strong>기본 색상</strong><small>src/tokens.css</small></div><div class="swatches">'+[['bg','배경'],['surface','카드'],['text','본문'],['primary','강조'],['good-bg','성공'],['warn-bg','주의']].map(([key,label])=>'<span><i style="--swatch:var(--ak-'+key+')"></i>'+label+'</span>').join('')+'</div></div><div class="ak filters catalog-filters">'+kit.search({id:'catalog-query',label:'컴포넌트 검색',value:catalogQuery})+kit.selectField({id:'catalog-kind',label:'출처',inline:true,value:catalogFilter,options:[{value:'all',label:'전체'},{value:'reference',label:'영상 참고'},{value:'common',label:'공통 확장'}]})+'<span id="catalog-count" class="muted" role="status"></span></div><div class="catalog ak">'+
       entries.map(([id,title,source,desc,args])=>{
         const isVideo=source.startsWith('영상'), snippet='AdminKit.'+id+'('+args.map(arg=>JSON.stringify(arg,null,2)).join(', ')+')';
         let preview=kit[id](...args);
         if(id==='confirmDialog')preview=kit.button({label:'확인 창 열기',action:'catalog-open'})+preview;
         if(id==='button')preview+=kit.button({label:'취소'})+kit.button({label:'삭제',tone:'danger'})+kit.button({label:'비활성',disabled:true});
-        return '<article class="demo-card" data-kind="'+(isVideo?'reference':'common')+'" data-search="'+e(id+' '+title+' '+desc)+'"><header><div><h2>'+title+'</h2><p>'+desc+'</p></div>'+badge(source,isVideo?'accent':'neutral')+'</header><div class="demo-stage">'+preview+'</div><details><summary>사용 코드</summary><pre><code id="snippet-'+id+'">document.querySelector(\'#example\').innerHTML = '+e(snippet)+';</code></pre><button class="ak-button copy" type="button" data-copy="'+id+'">코드 복사</button></details></article>';
+        return '<article class="demo-card" data-kind="'+(isVideo?'reference':'common')+'" data-search="'+e(id+' '+title+' '+desc)+'"><header><div><h2 id="component-'+id+'">'+title+'</h2><p>'+desc+'</p></div>'+badge(source,isVideo?'accent':'neutral')+'</header><div class="demo-stage">'+preview+'</div><details><summary>사용 코드</summary><pre><code id="snippet-'+id+'">document.querySelector(\'#example\').innerHTML = '+e(snippet)+';</code></pre><button class="ak-button copy" type="button" data-copy="'+id+'">코드 복사</button> <button class="ak-button" type="button" data-copy-ai="'+id+'">AI 지시문 복사</button></details></article>';
       }).join('')+'</div>';
   }
   function filterCatalog(){
@@ -43,13 +44,13 @@
     const rows=data.activity.filter(row=>(filter==='all'||row.status===filter)&&(!query.trim()||(row.name+' '+row.group+' '+row.status).includes(query.trim())));
     return rb.activity({rows,emptyState:empty({title:'조건에 맞는 활동이 없습니다',detail:'검색어나 상태 조건을 바꿔보세요.',symbol:'search'})});
   }
-  function queueBody() {
+  function queueBody(dashboard=false) {
     if(state==='loading')return skeleton(4);
     if(state==='error')return empty({title:'대기열을 불러오지 못했어요',detail:'조회 오류이며, 처리할 일이 없다는 뜻은 아닙니다.',symbol:'alert'});
     if(state==='empty'||!queue.length)return empty({title:'처리할 일이 없습니다',detail:'새 요청이 들어오면 대기열에 표시됩니다.'});
-    return kit.workQueue({rows:queue,disabled:['offline','reconnecting'].includes(state)});
+    return (dashboard?rb.requestList:kit.workQueue)({rows:queue,disabled:['offline','reconnecting'].includes(state)});
   }
-  const titled=(name,desc,mark='')=>'<div class="rb-section-head"><div><h3>'+name+'</h3><p>'+desc+'</p></div>'+(mark?'<small>'+mark+'</small>':'')+'</div>';
+  const titled=(name,desc,mark='',controls='')=>'<div class="rb-section-head"><div><h3>'+name+'</h3><p>'+desc+'</p></div>'+'<div class="rb-section-tools">'+controls+(mark?'<small>'+mark+'</small>':'')+'</div></div>';
   const panel=(name,desc,body,mark='')=>'<article class="rb-panel">'+titled(name,desc,mark)+body+'</article>';
   function demoBlock(view) {
     const isQueue=view==='queue', busy=state==='loading', noData=state==='empty', error=state==='error';
@@ -70,7 +71,7 @@
     const historyAction=(!busy&&!noData&&!error&&!itemCount)?'<div class="rb-empty-action">'+kit.button({label:'처리 이력 보기',action:'view-history'})+'</div>':'';
     const art=(renderArt)=>busy?sk():error?empty({title:'보조 지표 조회 실패',detail:'다시 조회할 수 있습니다.',symbol:'alert'}):noData?empty({title:'표시할 지표 없음',detail:'기록이 생기면 표시됩니다.'}):renderArt();
     const dashboard='<div class="rb-metrics">'+metrics.map((item,index)=>busy?'<div class="rb-metric rb-metric-loading">'+skeleton(3)+'</div>':rb.metric({...item,index,quiet:error||noData,value:error?'—':noData?0:item.value,detail:error?'조회 실패':noData?'표시할 항목 없음':item.detail})).join('')+'</div>'+
-      '<div class="rb-middle"><article class="rb-panel rb-wide-panel">'+titled('오늘의 활동','시간대별 실행과 주요 이벤트','오늘')+filterBar+'<div id="activity-results">'+activities()+'</div></article>'+panel('내가 처리할 일','검토할 요청',queueBody(),busy||error?'':noData?'0건':itemCount+'건')+'</div>'+
+      '<div class="rb-middle"><article class="rb-panel rb-wide-panel">'+titled('오늘의 활동','시간대별 실행과 주요 이벤트','오늘',filterBar)+'<div id="activity-results">'+activities()+'</div></article>'+panel('내가 처리할 일','검토할 요청',queueBody(true),busy||error?'':noData?'0건':itemCount+'건')+'</div>'+
       '<div class="rb-bottom">'+panel('목표와의 차이','기준선 대비 현재 상태',art(rb.comparison),'현재')+panel('다음 실행 임박','조건에 가까워지는 작업',art(rb.thresholds),'실시간')+panel('운영 효과','자동화 기여도 예시',art(rb.impact))+'</div>';
     const approval='<div class="rb-middle rb-approval"><article class="rb-panel rb-approval-main">'+titled('승인 요청','검토할 항목이 이곳에 표시됩니다.')+queueBody()+historyAction+'<div class="rb-approval-summary"><span>오늘 완료 <strong>'+e(error||busy?'—':noData?0:data.stats[2].value+done)+'</strong></span><span>처리 대기 <strong>'+e(error||busy?'—':noData?0:itemCount)+'</strong></span><span>다음 예정 <strong>'+e(error||busy||noData?'—':'16:00')+'</strong></span></div></article><div class="rb-stack" id="approval-history" tabindex="-1">'+panel('최근 처리','완료된 작업',history())+panel('다음 예정 작업','등록된 작업 일정',schedule())+'</div></div>';
     return '<div class="ak rb-page">'+context+'<section class="rb-shell" aria-label="영상 참고 관리자 예제">'+rb.rail(view)+'<div class="rb-body">'+header+(isQueue?approval:dashboard)+'<div class="rb-connection">'+connection(state,synced)+'</div></div></section></div>'+
@@ -113,7 +114,7 @@
     if(button.hasAttribute('data-retry')){
       if(state==='error'){state='normal';render();focusSelector('#scenario');announcement.textContent='예제 조회를 다시 완료했습니다.';return;}
       state='reconnecting';render();focusSelector('#scenario');
-      timer=setTimeout(()=>{state='recovered';synced=new Intl.DateTimeFormat('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());if(['blocks','queue'].includes(route()))render();announcement.textContent='예제 연결이 복구됐습니다.';},450);return;
+      timer=setTimeout(()=>{state='recovered';synced=new Intl.DateTimeFormat('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());if(['blocks','queue'].includes(route())){const id=document.activeElement?.id;render();if(id)focusSelector('#'+CSS.escape(id));}announcement.textContent='예제 연결이 복구됐습니다.';},450);return;
     }
     if(action.startsWith('review:')&&route()!=='components'){
       const item=queue.find(row=>row.id===action.slice(7));
@@ -124,6 +125,13 @@
     if(action==='cancel:review'){document.querySelector('#review').close();return;}
     if(action==='review-confirm'&&activeId){
       const item=queue.find(row=>row.id===activeId);if(item)decisions.unshift({title:item.name,detail:'예제에서 검토 완료',time:'방금'});queue=queue.filter(row=>row.id!==activeId);activeId=null;document.querySelector('#review').close();render();focusSelector('[data-ak-action^="review:"]:not(:disabled)');if(!main.contains(document.activeElement))main.focus();announcement.textContent='예제 요청을 완료 처리했습니다.';return;
+    }
+    if(button.hasAttribute('data-copy-ai')){
+      const source='https://github.com/Edwin-space/admin-ui-kit';
+      const instruction=source+'의 AGENTS.md와 registry/index.json을 읽고, '+button.dataset.copyAi+' 부품만 현재 프로젝트의 대상 화면에 적용해. 기존 권한, API, 동작 및 프레임워크를 유지하고, fixtures.js 및 데모 앱은 가져오지 마.';
+      try{await navigator.clipboard.writeText(instruction);button.textContent='AI 지시문 복사 완료';announcement.textContent='AI 지시문을 복사했어요.';}
+      catch{let field=button.parentElement.querySelector('.ai-copy-fallback');if(!field){field=document.createElement('textarea');field.className='ai-copy-fallback';field.setAttribute('aria-label','복사용 AI 지시문');field.readOnly=true;button.after(field);}field.value=instruction;field.focus();field.select();announcement.textContent='AI 지시문을 선택했어요. Ctrl+C 또는 Cmd+C로 복사하세요.';}
+      return;
     }
     if(button.hasAttribute('data-copy')){
       const code=document.querySelector('#snippet-'+button.dataset.copy);

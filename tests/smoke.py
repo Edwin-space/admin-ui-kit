@@ -21,6 +21,8 @@ with sync_playwright() as p:
     expect(page.locator("#snippet-stat")).to_contain_text("AdminKit.stat")
     page.get_by_role("button", name="코드 복사").first.click()
     expect(page.locator("#announcement")).to_contain_text("복사")
+    page.get_by_role("button", name="AI 지시문 복사").first.click()
+    expect(page.locator("#announcement")).to_contain_text("AI 지시문")
     assert not page.evaluate("AdminKit.badge('<img src=x onerror=alert(1)>').includes('<img')")
     page.goto(url + "#blocks")
     expect(page.locator(".rb-metrics .rb-metric")).to_have_count(4)
@@ -41,6 +43,7 @@ with sync_playwright() as p:
     expect(page.get_by_role("button", name="검토").first).to_be_disabled()
     page.get_by_role("button", name="다시 시도").click()
     expect(page.get_by_text("연결 복구됨")).to_be_visible()
+    expect(page.locator("#scenario")).to_be_focused()
     expect(page.get_by_role("button", name="검토").first).to_be_enabled()
     page.get_by_role("link", name="처리 대기열").first.click()
     page.get_by_role("button", name="검토").first.click()
@@ -56,6 +59,10 @@ with sync_playwright() as p:
         for route in ["overview", "components", "blocks", "queue"]:
             page.goto(url + "#" + route)
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), (width, route)
+    page.goto((Path(__file__).resolve().parents[1] / "examples" / "blocks-starter.html").as_uri())
+    expect(page.locator(".rb-event-list li")).to_have_count(1)
+    page.get_by_role("button", name="검토").click()
+    expect(page.locator("#status")).to_contain_text("호스트에서 검토 이벤트")
     assert not errors, errors
     assert not external, external
     browser.close()

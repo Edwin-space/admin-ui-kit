@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin UI Kit · 독립 블록 예제</title>
+<link rel="stylesheet" href="../src/tokens.css">
+<link rel="stylesheet" href="../src/components.css">
+<link rel="stylesheet" href="../src/reference-blocks.css">
+<style>
+ body{margin:0;background:var(--ak-bg)}
+ main{width:min(100% - 32px,900px);margin:32px auto}
+ h1{font-size:24px} h2{font-size:16px}
+ section{margin-top:12px}
+</style>
+<main class="ak rb-page">
+ <h1>필요한 블록만 가져오기</h1>
+ <p>카탈로그, 대시보드 앱, 공용 가짜 데이터 파일을 불러오지 않습니다.</p>
+ <section class="rb-panel"><h2>활동</h2><div id="events"></div></section>
+ <section class="rb-panel"><h2>요청</h2><div id="requests"></div><p id="status" role="status"></p></section>
+</main>
+<script src="../src/components.js"></script>
+<script src="../src/reference-blocks.js"></script>
+<script>
+ document.querySelector('#events').innerHTML=AdminReference.activity({
+   rows:[{time:'09:15',group:'보고서',name:'예제 보고서 생성 완료',status:'완료',tone:'good'}],
+   emptyState:AdminKit.empty({title:'활동 없음'})
+ });
+ const requests=document.querySelector('#requests');
+ requests.innerHTML=AdminReference.requestList({
+   rows:[{id:'demo-1',name:'예제 자료 검토',detail:'로컬 예제',status:'대기',tone:'warn'}]
+ });
+ requests.addEventListener('click',event=>{
+   const action=event.target.closest('button')?.dataset.akAction;
+   if(action==='review:demo-1')document.querySelector('#status').textContent='호스트에서 검토 이벤트를 받았습니다. 실제 저장은 하지 않습니다.';
+ });
+</script>
+</html>
