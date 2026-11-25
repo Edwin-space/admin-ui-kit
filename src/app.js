@@ -1,13 +1,13 @@
 (function () {
   'use strict';
-  const kit=window.AdminKit, data=window.AdminFixtures, {e,icon,badge,stat,empty,skeleton,connection,table}=kit;
+  const kit=window.AdminKit, data=window.AdminFixtures, rb=window.AdminReference, {e,icon,badge,stat,empty,skeleton,connection,table}=kit;
   const main=document.querySelector('#main'), announcement=document.querySelector('#announcement');
   const columns=[{label:'시간',key:'time'},{label:'활동',key:'name'},{label:'분류',key:'group'},{label:'상태',key:'status',kind:'badge'}];
-  let state='normal', query='', filter='all', queue=data.queue.slice(), activeId=null, timer=null, synced='';
+  let state='normal', query='', filter='all', queue=data.queue.slice(), activeId=null, timer=null, synced='', decisions=[];
   const choices={normal:'기본',loading:'로딩',empty:'빈 화면',error:'조회 오류',offline:'연결 끊김'};
   function route() {
     const value=location.hash.slice(1);
-    return ['overview','components','blocks','queue'].includes(value)?value:'overview';
+    return ['overview','components','blocks','queue'].includes(value)?value:'blocks';
   }
   const intro=(label,title,detail)=>'<div class="intro"><span class="eyebrow">'+label+'</span><h1>'+title+'</h1><p>'+detail+'</p></div>';
   const link=(to,label,primary=false)=>'<a href="#'+to+'" class="ak-button '+(primary?'ak-button--primary':'')+'">'+label+icon('arrow')+'</a>';
@@ -41,7 +41,7 @@
     if(state==='error')return empty({title:'활동을 불러오지 못했어요',detail:'지금은 최근 활동을 확인할 수 없습니다.',symbol:'alert'})+'<button type="button" class="ak-button" data-retry>다시 시도</button>';
     if(state==='empty')return empty({title:'새 활동이 없습니다',detail:'작업이 발생하면 최근 활동에 표시됩니다.'});
     const rows=data.activity.filter(row=>(filter==='all'||row.status===filter)&&(!query.trim()||(row.name+' '+row.group+' '+row.status).includes(query.trim())));
-    return rows.length?table({columns,rows}):empty({title:'조건에 맞는 활동이 없습니다',detail:'검색어나 상태 조건을 바꿔보세요.',symbol:'search'});
+    return rb.activity({rows,emptyState:empty({title:'조건에 맞는 활동이 없습니다',detail:'검색어나 상태 조건을 바꿔보세요.',symbol:'search'})});
   }
   function queueBody() {
     if(state==='loading')return skeleton(4);
@@ -49,23 +49,32 @@
     if(state==='empty'||!queue.length)return empty({title:'처리할 일이 없습니다',detail:'새 요청이 들어오면 대기열에 표시됩니다.'});
     return kit.workQueue({rows:queue,disabled:['offline','reconnecting'].includes(state)});
   }
-  const title=(heading,desc)=>'<div class="ak-panel-head"><div><h3>'+heading+'</h3><p>'+desc+'</p></div></div>';
+  const titled=(name,desc,mark='')=>'<div class="rb-section-head"><div><h3>'+name+'</h3><p>'+desc+'</p></div>'+(mark?'<small>'+mark+'</small>':'')+'</div>';
+  const panel=(name,desc,body,mark='')=>'<article class="rb-panel">'+titled(name,desc,mark)+body+'</article>';
   function demoBlock(view) {
     const isQueue=view==='queue', busy=state==='loading', noData=state==='empty', error=state==='error';
-    const completed=data.queue.length-queue.length;
-    const metrics=[{...data.stats[0],value:queue.length},{...data.stats[1],value:queue.filter(row=>row.status==='기한 임박').length},{...data.stats[2],value:data.stats[2].value+completed},data.stats[3]];
-    return intro('BLOCKS / 03','화면 예제','가짜 데이터로 운영 화면과 예외 상태를 직접 확인하세요.')+
-      '<div class="ak demo-controls">'+kit.tabs({label:'화면 선택',items:[{label:'운영 대시보드',href:'#blocks',current:!isQueue},{label:'처리 대기열',href:'#queue',current:isQueue}]})+kit.selectField({id:'scenario',label:'시나리오',inline:true,value:['recovered','reconnecting'].includes(state)?'offline':state,options:Object.entries(choices).map(([value,label])=>({value,label}))})+'</div>'+
-      '<section class="ak workspace" aria-label="관리자 실행 예제">'+kit.sidebar({title:'운영 워크스페이스',items:[{label:'운영 개요',href:'#blocks',symbol:'grid',current:!isQueue},{label:'처리 대기열',href:'#queue',symbol:'queue',current:isQueue}],footer:'DEMO · 데이터 미연결'})+
-      '<div class="workspace-body">'+kit.pageHeader({context:'운영 워크스페이스 / '+(isQueue?'업무':'홈'),title:isQueue?'처리 대기열':'운영 대시보드',detail:isQueue?'검토할 요청과 상태를 확인합니다.':'운영 상태와 오늘 처리할 일을 한눈에 볼 수 있습니다.',status:'가짜 데이터'})+
-      (!isQueue?'<div class="stat-grid">'+metrics.map(item=>busy?'<div class="ak-card stat-loading">'+skeleton(3)+'</div>':stat({...item,value:error?'—':noData?0:item.value,detail:error?'조회 실패':noData?'표시할 항목 없음':item.detail})).join('')+'</div>':'')+
-      (isQueue?'<article class="ak-card ak-panel">'+title('검토할 요청','검토 버튼으로 예제 확인 창을 열 수 있습니다.')+queueBody()+'</article>':
-        '<div class="panel-grid"><article class="ak-card ak-panel">'+title('최근 활동','업무 이벤트와 조회 결과')+
-        '<div class="filters">'+kit.search({id:'query',label:'활동 검색',value:query})+kit.selectField({id:'filter',label:'상태',inline:true,value:filter,options:[{value:'all',label:'모든 상태'},{value:'완료',label:'완료'},{value:'대기',label:'대기'},{value:'실패',label:'실패'}]})+'</div><div id="activity-results">'+activities()+'</div></article><article class="ak-card ak-panel">'+title('내가 처리할 일','우선 확인할 요청입니다.')+queueBody()+'</article></div>')+
-      (!busy&&!error&&!noData?'<div class="ak-extra"><article class="ak-card ak-panel">'+title('다음 예정 작업','일정이 있는 작업')+kit.upcoming({items:data.upcoming})+'</article><article class="ak-card ak-panel">'+title('처리 흐름','예제 지표')+kit.progress({label:'검토 진척',value:Math.round((3-queue.length)/3*100)})+kit.barChart({label:'시간대별 처리',values:[4,6,5,7,5,10,7,6],summary:'예제 8구간 · 최고 10건'})+'</article></div>':'')+
-      '<div class="connection-wrap">'+connection(state,synced)+'</div></div></section>'+
+    const done=data.queue.length-queue.length;
+    const metrics=[
+      {label:'오늘 처리',value:data.stats[2].value+done,detail:'완료된 예제 작업',symbol:'activity',tone:'accent'},
+      {label:'승인 대기',value:queue.length,detail:'내가 확인할 요청',symbol:'clock',tone:'warn'},
+      {label:'확인 필요',value:data.stats[3].value,detail:'실패한 작업',symbol:'alert',tone:'bad'},
+      {label:'운영 지표',value:'+24%',detail:'예제 효율 변화',symbol:'check',tone:'good'}
+    ];
+    const itemCount=queue.length;
+    const filterBar='<div class="rb-view-tools">'+kit.selectField({id:'filter',label:'상태',inline:true,value:filter,options:[{value:'all',label:'모든 상태'},{value:'완료',label:'완료'},{value:'대기',label:'대기'},{value:'실패',label:'실패'}]})+'</div>';
+    const context='<div class="rb-toolbar"><div><span class="rb-context">화면 예제</span>'+kit.tabs({label:'화면 선택',items:[{label:'운영 대시보드',href:'#blocks',current:!isQueue},{label:'처리 대기열',href:'#queue',current:isQueue}]})+'</div>'+kit.selectField({id:'scenario',label:'시나리오',inline:true,value:['recovered','reconnecting'].includes(state)?'offline':state,options:Object.entries(choices).map(([value,label])=>({value,label}))})+'</div>';
+    const header='<div class="rb-head"><div><h1>'+(isQueue?'처리 대기열':'운영 대시보드')+'</h1><p>'+(isQueue?'검토할 요청과 최근 처리 내역':'오늘의 실행 현황과 확인이 필요한 작업')+' <span>· 가짜 데이터</span></p></div><div class="rb-actions">'+(!isQueue?kit.search({id:'query',label:'활동 검색',value:query}):'')+'<a class="ak-button rb-head-action" href="'+(isQueue?'#blocks':'#queue')+'">'+icon(isQueue?'grid':'queue')+(isQueue?'홈':'승인 보기')+'</a></div></div>';
+    const sk=()=>'<div class="rb-art-loading">'+skeleton(5)+'</div>';
+    const schedule=()=>busy?sk():error?kit.notice({title:'일정 조회 실패',detail:'지금은 예정 작업을 표시할 수 없습니다.',tone:'bad'}):noData?empty({title:'예정 작업 없음',detail:'새 일정이 생기면 표시됩니다.'}):kit.upcoming({items:data.upcoming});
+    const history=()=>busy?sk():error?kit.notice({title:'처리 이력 조회 실패',detail:'나중에 다시 확인할 수 있습니다.',tone:'bad'}):noData?empty({title:'최근 이력 없음',detail:'처리한 작업이 이곳에 표시됩니다.'}):kit.timeline({items:[...decisions,...data.activity.filter(item=>item.status==='완료').map(item=>({title:item.name,time:item.time,detail:item.group}))].slice(0,5)});
+    const historyAction=(!busy&&!noData&&!error&&!itemCount)?'<div class="rb-empty-action">'+kit.button({label:'처리 이력 보기',action:'view-history'})+'</div>':'';
+    const art=(renderArt)=>busy?sk():error?empty({title:'보조 지표 조회 실패',detail:'다시 조회할 수 있습니다.',symbol:'alert'}):noData?empty({title:'표시할 지표 없음',detail:'기록이 생기면 표시됩니다.'}):renderArt();
+    const dashboard='<div class="rb-metrics">'+metrics.map((item,index)=>busy?'<div class="rb-metric rb-metric-loading">'+skeleton(3)+'</div>':rb.metric({...item,index,quiet:error||noData,value:error?'—':noData?0:item.value,detail:error?'조회 실패':noData?'표시할 항목 없음':item.detail})).join('')+'</div>'+
+      '<div class="rb-middle"><article class="rb-panel rb-wide-panel">'+titled('오늘의 활동','시간대별 실행과 주요 이벤트','오늘')+filterBar+'<div id="activity-results">'+activities()+'</div></article>'+panel('내가 처리할 일','검토할 요청',queueBody(),busy||error?'':noData?'0건':itemCount+'건')+'</div>'+
+      '<div class="rb-bottom">'+panel('목표와의 차이','기준선 대비 현재 상태',art(rb.comparison),'현재')+panel('다음 실행 임박','조건에 가까워지는 작업',art(rb.thresholds),'실시간')+panel('운영 효과','자동화 기여도 예시',art(rb.impact))+'</div>';
+    const approval='<div class="rb-middle rb-approval"><article class="rb-panel rb-approval-main">'+titled('승인 요청','검토할 항목이 이곳에 표시됩니다.')+queueBody()+historyAction+'<div class="rb-approval-summary"><span>오늘 완료 <strong>'+e(error||busy?'—':noData?0:data.stats[2].value+done)+'</strong></span><span>처리 대기 <strong>'+e(error||busy?'—':noData?0:itemCount)+'</strong></span><span>다음 예정 <strong>'+e(error||busy||noData?'—':'16:00')+'</strong></span></div></article><div class="rb-stack" id="approval-history" tabindex="-1">'+panel('최근 처리','완료된 작업',history())+panel('다음 예정 작업','등록된 작업 일정',schedule())+'</div></div>';
+    return '<div class="ak rb-page">'+context+'<section class="rb-shell" aria-label="영상 참고 관리자 예제">'+rb.rail(view)+'<div class="rb-body">'+header+(isQueue?approval:dashboard)+'<div class="rb-connection">'+connection(state,synced)+'</div></div></section></div>'+
       kit.confirmDialog({id:'review',title:'요청 검토',detailId:'review-detail',detail:'이 동작은 예제 안에서만 적용되며 실제 시스템에 전송하지 않습니다.',confirmLabel:'예제에서 완료 처리',action:'review-confirm'});
-
   }
   function render() {
     const r=route();
@@ -73,6 +82,7 @@
       const selected=a.hash==='#'+(r==='queue'?'blocks':r);
       if(selected)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');
     });
+    main.classList.toggle('wide-preview',r==='blocks'||r==='queue');
     main.innerHTML=r==='components'?components():r==='overview'?overview():demoBlock(r);
     if(r==='components')filterCatalog();
   }
@@ -92,6 +102,7 @@
     const button=event.target.closest('button');
     if(!button||button.disabled)return;
     const action=button.dataset.akAction||'';
+    if(action==='view-history'){focusSelector('#approval-history');document.querySelector('#approval-history')?.scrollIntoView({block:'nearest'});return;}
     if(action==='catalog-open'){document.querySelector('#catalog-dialog')?.showModal();focusSelector('[data-ak-action="cancel:catalog-dialog"]');return;}
     if(action==='catalog-confirm'||action==='cancel:catalog-dialog'){document.querySelector('#catalog-dialog')?.close();focusSelector('[data-ak-action="catalog-open"]');return;}
     if(route()==='components'&&action.startsWith('page:')){
@@ -112,7 +123,7 @@
     }
     if(action==='cancel:review'){document.querySelector('#review').close();return;}
     if(action==='review-confirm'&&activeId){
-      queue=queue.filter(row=>row.id!==activeId);activeId=null;document.querySelector('#review').close();render();focusSelector('[data-ak-action^="review:"]:not(:disabled)');if(!main.contains(document.activeElement))main.focus();announcement.textContent='예제 요청을 완료 처리했습니다.';return;
+      const item=queue.find(row=>row.id===activeId);if(item)decisions.unshift({title:item.name,detail:'예제에서 검토 완료',time:'방금'});queue=queue.filter(row=>row.id!==activeId);activeId=null;document.querySelector('#review').close();render();focusSelector('[data-ak-action^="review:"]:not(:disabled)');if(!main.contains(document.activeElement))main.focus();announcement.textContent='예제 요청을 완료 처리했습니다.';return;
     }
     if(button.hasAttribute('data-copy')){
       const code=document.querySelector('#snippet-'+button.dataset.copy);

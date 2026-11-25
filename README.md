@@ -1,5 +1,7 @@
 # Admin UI Kit
 
+**v0.3:** 첫 화면을 영상 참고 운영 대시보드로 바꿨습니다. [영상 기준 레이아웃](docs/design/REFERENCE-LAYOUT.md) · [범용 컴포넌트](docs/design/COMPONENTS.md)
+
 관리자 화면을 위한 라이브 컴포넌트 카탈로그와 대시보드 예제입니다. [공개 카탈로그 열기](https://edwin-space.github.io/admin-ui-kit/)
 
 - **Foundations:** 색상, 여백, 서체 등 공통 토큰
