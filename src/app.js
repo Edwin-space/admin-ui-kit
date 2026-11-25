@@ -52,7 +52,8 @@
   const title=(heading,desc)=>'<div class="ak-panel-head"><div><h3>'+heading+'</h3><p>'+desc+'</p></div></div>';
   function demoBlock(view) {
     const isQueue=view==='queue', busy=state==='loading', noData=state==='empty', error=state==='error';
-    const metrics=[{...data.stats[0],value:queue.length},...data.stats.slice(1)];
+    const completed=data.queue.length-queue.length;
+    const metrics=[{...data.stats[0],value:queue.length},{...data.stats[1],value:queue.filter(row=>row.status==='기한 임박').length},{...data.stats[2],value:data.stats[2].value+completed},data.stats[3]];
     return intro('BLOCKS / 03','화면 예제','가짜 데이터로 운영 화면과 예외 상태를 직접 확인하세요.')+
       '<div class="ak demo-controls">'+kit.tabs({label:'화면 선택',items:[{label:'운영 대시보드',href:'#blocks',current:!isQueue},{label:'처리 대기열',href:'#queue',current:isQueue}]})+kit.selectField({id:'scenario',label:'시나리오',inline:true,value:['recovered','reconnecting'].includes(state)?'offline':state,options:Object.entries(choices).map(([value,label])=>({value,label}))})+'</div>'+
       '<section class="ak workspace" aria-label="관리자 실행 예제">'+kit.sidebar({title:'운영 워크스페이스',items:[{label:'운영 개요',href:'#blocks',symbol:'grid',current:!isQueue},{label:'처리 대기열',href:'#queue',symbol:'queue',current:isQueue}],footer:'DEMO · 데이터 미연결'})+
